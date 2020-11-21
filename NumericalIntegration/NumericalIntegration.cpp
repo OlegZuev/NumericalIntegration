@@ -5,7 +5,7 @@
 #include "Functions.h"
 using namespace std;
 
-const bool PRINT_TO_FILE = false;
+const bool PRINT_TO_FILE = true;
 
 
 int main()
@@ -15,8 +15,8 @@ int main()
 
 	out << "Variant: " << VARIANT << endl;
 
-	// run_method(1, 2, trapezoid, out);
-	// run_method(1, 2, trapezoid_modified, out);
-	// run_method(1, 2, simpson, out);
-	run_method(1, 2, gauss, out);
+	trapezoid_method(1, 2, false, out);
+	trapezoid_method(1, 2, true, out);
+	simpson_method(1, 2, out);
+	gauss_method(1, 2, out);
 }

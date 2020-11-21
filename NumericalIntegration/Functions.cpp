@@ -95,30 +95,15 @@ void print_matrix(double** matrix, int n, int m, std::ostream& ostr) {
 	ostr << std::endl;
 }
 
-void run_method(double a, double b, TypeMethod method, std::ostream& ostr) {
+void trapezoid_method(double a, double b, bool modified, std::ostream& ostr) {
 	void (*compute_integral)(double a, double b, int N, double& h, double& integral_value) = nullptr;
-	double coef = 0;
-	switch (method) {
-	case trapezoid:
-		ostr << "Trapezoid formula" << std::endl;
-		compute_integral = compute_integral_trapezium_method;
-		coef = 1 / 3.0;
-		break;
-	case trapezoid_modified:
+	double coef = 1 / 3.0;
+	if (modified) {
 		ostr << "Trapezoid modified formula" << std::endl;
 		compute_integral = compute_integral_trapezium_modified_method;
-		coef = 1 / 3.0;
-		break;
-	case simpson:
-		ostr << "Simpson formula" << std::endl;
-		compute_integral = compute_integral_simpson;
-		coef = 10 / 15.0;
-		break;
-	case gauss:
-		ostr << "Gauss formula" << std::endl;
-		compute_integral = compute_integral_gauss1;
-		coef = 1 / 63.0;
-		break;
+	} else {
+		ostr << "Trapezoid formula" << std::endl;
+		compute_integral = compute_integral_trapezium_method;
 	}
 
 	ostr << "|N    |h     |Integral |Error estimation|  k   |" << std::endl;
@@ -164,10 +149,9 @@ void run_method(double a, double b, TypeMethod method, std::ostream& ostr) {
 		count_call3 = count_of_calls_to_the_function - count_call3;
 
 		k = log((integral_h3 - integral_h1) / (integral_h2 - integral_h1) - 1) / log(0.5);
-		// error = ((integral_h2 - integral_h1) / (pow(h1, k) * (1 - pow(0.5, k)))) * pow(h1, k);
 		error = (integral_h1 - integral_h0) * coef;
 
-		if (N > 1) {
+		if (N > 4) {
 			ostr << std::fixed << std::setprecision(9) << "|" << N / 4 << "|" << h1 << "|" << integral_h1 << "|" <<
 				std::scientific << error << "|" << std::fixed << k << "|" << std::endl;
 		}
@@ -178,12 +162,132 @@ void run_method(double a, double b, TypeMethod method, std::ostream& ostr) {
 
 
 		N *= 2;
-	} while (fabs(error) * 10 > EPS);
+	} while (fabs(error / integral_h1)  > EPS);
 
-	ostr << "Result " << integral_h1 << std::endl;
+	ostr << "Result " << std::setprecision(15) << integral_h1 << std::endl;
 	ostr << "Number of requests " << count_call1 << std::endl;
-	ostr << "All Number of requests " << count_of_calls_to_the_function - begin_count_of_calls_to_the_function <<
-		std::endl;
+}
+
+void simpson_method(double a, double b, std::ostream& ostr) {
+	void (*compute_integral)(double a, double b, int N, double& h, double& integral_value) = compute_integral_simpson;
+	double coef = 1 / 15.0;
+	ostr << "Simpson formula" << std::endl;
+	ostr << "|N    |h     |Integral |Error estimation|  k   |" << std::endl;
+
+	double error;
+	int N = 1;
+	double k;
+	double integral_h1 = 0;
+	double integral_h2;
+	double integral_h3;
+	double h1;
+	double h2;
+	double h3;
+	int begin_count_of_calls_to_the_function;
+	int count_call1;
+	int count_call2;
+	int count_call3;
+
+	begin_count_of_calls_to_the_function = count_of_calls_to_the_function;
+
+	count_call2 = count_of_calls_to_the_function;
+	compute_integral(a, b, N, h2, integral_h2);
+	count_call2 = count_of_calls_to_the_function - count_call2;
+	N *= 2;
+
+	count_call3 = count_of_calls_to_the_function;
+	compute_integral(a, b, N, h3, integral_h3);
+	count_call3 = count_of_calls_to_the_function - count_call3;
+	N *= 2;
+
+	do {
+		integral_h1 = integral_h2;
+		integral_h2 = integral_h3;
+		h1 = h2;
+		h2 = h3;
+		count_call1 = count_call2;
+		count_call2 = count_call3;
+
+		count_call3 = count_of_calls_to_the_function;
+		compute_integral(a, b, N, h3, integral_h3);
+		count_call3 = count_of_calls_to_the_function - count_call3;
+
+		k = log((integral_h3 - integral_h1) / (integral_h2 - integral_h1) - 1) / log(0.5);
+		error = (integral_h2 - integral_h1) * coef;
+
+		ostr << std::fixed << std::setprecision(9) << "|" << N / 4 << "|" << h1 << "|" << integral_h2 << "|" <<
+			std::scientific << error << "|" << std::fixed << k << "|" << std::endl;
+
+		N *= 2;
+	} while (fabs(error / integral_h2)  > EPS);
+
+	ostr << "Result " << std::setprecision(15) << integral_h2 << std::endl;
+	ostr << "Number of requests " << count_call2 << std::endl;
+}
+
+void gauss_method(double a, double b, std::ostream& ostr) {
+	void (*compute_integral)(double a, double b, int N, double& h, double& integral_value) = compute_integral_gauss;
+	double coef = 1 / 63.0;
+	ostr << "Gauss formula" << std::endl;
+	ostr << "|N    |h     |Integral |Error estimation|  k   |" << std::endl;
+
+	double error;
+	int N = 1;
+	double k;
+	double integral_h0;
+	double integral_h1 = 0;
+	double integral_h2;
+	double integral_h3;
+	double h1;
+	double h2;
+	double h3;
+	int begin_count_of_calls_to_the_function;
+	int count_call1;
+	int count_call2;
+	int count_call3;
+
+	begin_count_of_calls_to_the_function = count_of_calls_to_the_function;
+
+	count_call2 = count_of_calls_to_the_function;
+	compute_integral(a, b, N, h2, integral_h2);
+	count_call2 = count_of_calls_to_the_function - count_call2;
+	N *= 2;
+
+	count_call3 = count_of_calls_to_the_function;
+	compute_integral(a, b, N, h3, integral_h3);
+	count_call3 = count_of_calls_to_the_function - count_call3;
+	N *= 2;
+
+	do {
+		integral_h0 = integral_h1;
+		integral_h1 = integral_h2;
+		integral_h2 = integral_h3;
+		h1 = h2;
+		h2 = h3;
+		count_call1 = count_call2;
+		count_call2 = count_call3;
+
+		count_call3 = count_of_calls_to_the_function;
+		compute_integral(a, b, N, h3, integral_h3);
+		count_call3 = count_of_calls_to_the_function - count_call3;
+
+		k = log((integral_h3 - integral_h1) / (integral_h2 - integral_h1) - 1) / log(0.5);
+		error = (integral_h1 - integral_h0) * coef;
+
+		if (N > 4) {
+			ostr << std::fixed << std::setprecision(9) << "|" << N / 4 << "|" << h1 << "|" << integral_h1 << "|" <<
+				std::scientific << error << "|" << std::fixed << k << "|" << std::endl;
+		}
+		else {
+			ostr << std::fixed << std::setprecision(9) << "|" << N / 4 << "|" << h1 << "|" << integral_h1 << "|" <<
+				std::scientific << std::endl;
+		}
+
+		N *= 2;
+	} while (fabs(error / integral_h1) > EPS);
+
+	ostr << "Result " << std::setprecision(15) << integral_h1 << std::endl;
+	ostr << "Number of requests " << count_of_calls_to_the_function - count_call2 - count_call3 - begin_count_of_calls_to_the_function << std::endl;
 }
 
 void compute_integral_trapezium_method(double a, double b, int N, double& h, double& integral_value) {
