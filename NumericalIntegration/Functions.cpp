@@ -8,14 +8,12 @@ int count_of_calls_to_the_function = 0;
 /*
  * func for task
  */
-double func(double x)
-{
+double func(double x) {
 	count_of_calls_to_the_function++;
 
-	switch (VARIANT)
-	{
+	switch (VARIANT) {
 	case 0:
-		return pow(3, x - 1) + 4 - x;
+		return pow(2, x) - 3 * x + 2;
 	case 5:
 		return pow(3, x - 1) + 2 - x;
 	case 7:
@@ -28,10 +26,8 @@ double func(double x)
 /*
  * max f^(number_of_derivative) on [a,b]
  */
-double compute_m(int number_of_derivative)
-{
-	switch (VARIANT)
-	{
+double compute_m(int number_of_derivative) {
+	switch (VARIANT) {
 	case 0:
 	case 5:
 		return fabs(3 * pow(log(3), number_of_derivative));
@@ -45,11 +41,10 @@ double compute_m(int number_of_derivative)
 /*
  * compute first derivative func
  */
-double compute_derivative_func(double x)
-{
-	switch (VARIANT)
-	{
+double compute_derivative_func(double x) {
+	switch (VARIANT) {
 	case 0:
+		return pow(2, x) * log(2) - 3;
 	case 5:
 		return pow(3, x - 1) * log(3) - 1;
 	case 7:
@@ -65,12 +60,10 @@ double compute_derivative_func(double x)
  * n - count of rows
  * m - count of columns
  */
-void allocate_matrix(double**& matrix, int n, int m)
-{
+void allocate_matrix(double**& matrix, int n, int m) {
 	matrix = new double* [n];
-	for (int i = 0; i < n; ++i)
-	{
-		matrix[i] = new double[m] { 0 };
+	for (int i = 0; i < n; ++i) {
+		matrix[i] = new double[m] {0};
 	}
 }
 
@@ -79,10 +72,8 @@ void allocate_matrix(double**& matrix, int n, int m)
  * n - count of rows
  * m - count of columns
  */
-void delete_matrix(double** matrix, int n, int m)
-{
-	for (int i = 0; i < n; ++i)
-	{
+void delete_matrix(double** matrix, int n, int m) {
+	for (int i = 0; i < n; ++i) {
 		delete[] matrix[i];
 	}
 
@@ -92,12 +83,9 @@ void delete_matrix(double** matrix, int n, int m)
 /*
  * print matrix n*m into ostr
  */
-void print_matrix(double** matrix, int n, int m, std::ostream& ostr)
-{
-	for (int i = 0; i < n; ++i)
-	{
-		for (int j = 0; j < m; ++j)
-		{
+void print_matrix(double** matrix, int n, int m, std::ostream& ostr) {
+	for (int i = 0; i < n; ++i) {
+		for (int j = 0; j < m; ++j) {
 			ostr << std::fixed << std::setprecision(6) << matrix[i][j] << " ";
 		}
 
@@ -107,17 +95,41 @@ void print_matrix(double** matrix, int n, int m, std::ostream& ostr)
 	ostr << std::endl;
 }
 
-void trapezium_method(double a, double b, std::ostream& ostr)
-{
-	ostr << "Trapezoid formula" << std::endl;
+void run_method(double a, double b, TypeMethod method, std::ostream& ostr) {
+	void (*compute_integral)(double a, double b, int N, double& h, double& integral_value) = nullptr;
+	double coef = 0;
+	switch (method) {
+	case trapezoid:
+		ostr << "Trapezoid formula" << std::endl;
+		compute_integral = compute_integral_trapezium_method;
+		coef = 1 / 3.0;
+		break;
+	case trapezoid_modified:
+		ostr << "Trapezoid modified formula" << std::endl;
+		compute_integral = compute_integral_trapezium_modified_method;
+		coef = 1 / 3.0;
+		break;
+	case simpson:
+		ostr << "Simpson formula" << std::endl;
+		compute_integral = compute_integral_simpson;
+		coef = 10 / 15.0;
+		break;
+	case gauss:
+		ostr << "Gauss formula" << std::endl;
+		compute_integral = compute_integral_gauss1;
+		coef = 1 / 63.0;
+		break;
+	}
+
 	ostr << "|N    |h     |Integral |Error estimation|  k   |" << std::endl;
 
 	double error;
 	int N = 1;
 	double k;
-	double inegral_h1;
-	double inegral_h2;
-	double inegral_h3;
+	double integral_h0;
+	double integral_h1 = 0;
+	double integral_h2;
+	double integral_h3;
 	double h1;
 	double h2;
 	double h3;
@@ -129,49 +141,93 @@ void trapezium_method(double a, double b, std::ostream& ostr)
 	begin_count_of_calls_to_the_function = count_of_calls_to_the_function;
 
 	count_call2 = count_of_calls_to_the_function;
-	comput_integral_trapezium_method(a, b, N, h2, inegral_h2);
+	compute_integral(a, b, N, h2, integral_h2);
 	count_call2 = count_of_calls_to_the_function - count_call2;
 	N *= 2;
 
 	count_call3 = count_of_calls_to_the_function;
-	comput_integral_trapezium_method(a, b, N, h3, inegral_h3);
+	compute_integral(a, b, N, h3, integral_h3);
 	count_call3 = count_of_calls_to_the_function - count_call3;
 	N *= 2;
 
-	do
-	{
-		inegral_h1 = inegral_h2;
-		inegral_h2 = inegral_h3;
+	do {
+		integral_h0 = integral_h1;
+		integral_h1 = integral_h2;
+		integral_h2 = integral_h3;
 		h1 = h2;
 		h2 = h3;
 		count_call1 = count_call2;
 		count_call2 = count_call3;
 
 		count_call3 = count_of_calls_to_the_function;
-		comput_integral_trapezium_method(a, b, N, h3, inegral_h3);
+		compute_integral(a, b, N, h3, integral_h3);
 		count_call3 = count_of_calls_to_the_function - count_call3;
 
-		k = log((inegral_h3 - inegral_h1) / (inegral_h2 - inegral_h1) - 1) / log(0.5);
-		error = ((inegral_h2 - inegral_h1) / (pow(h1, k) * (1 - pow(0.5, k)))) * pow(h1, k);
+		k = log((integral_h3 - integral_h1) / (integral_h2 - integral_h1) - 1) / log(0.5);
+		// error = ((integral_h2 - integral_h1) / (pow(h1, k) * (1 - pow(0.5, k)))) * pow(h1, k);
+		error = (integral_h1 - integral_h0) * coef;
 
-		ostr << std::fixed << std::setprecision(9) << "|" << N / 4 << "|" << h1 << "|" << inegral_h1 << "|" << error << "|" << k << "|" << std::endl;
+		if (N > 1) {
+			ostr << std::fixed << std::setprecision(9) << "|" << N / 4 << "|" << h1 << "|" << integral_h1 << "|" <<
+				std::scientific << error << "|" << std::fixed << k << "|" << std::endl;
+		}
+		else {
+			ostr << std::fixed << std::setprecision(9) << "|" << N / 4 << "|" << h1 << "|" << integral_h1 << "|" <<
+				std::scientific << std::endl;
+		}
+
 
 		N *= 2;
-	} while (fabs(error) > EPS);
+	} while (fabs(error) * 10 > EPS);
 
-	ostr << "Result " << inegral_h1 << std::endl;
+	ostr << "Result " << integral_h1 << std::endl;
 	ostr << "Number of requests " << count_call1 << std::endl;
-	ostr << "All Number of requests " << count_of_calls_to_the_function - begin_count_of_calls_to_the_function << std::endl;
+	ostr << "All Number of requests " << count_of_calls_to_the_function - begin_count_of_calls_to_the_function <<
+		std::endl;
 }
 
-void comput_integral_trapezium_method(double a, double b, int N, double& h, double& integral_value)
-{
-	h = fabs(b - a) / N;
+void compute_integral_trapezium_method(double a, double b, int N, double& h, double& integral_value) {
+	h = (b - a) / N;
 	double sum = 0;
-	for (int i = 1; i < N; i++)
-	{
+	for (int i = 1; i < N; i++) {
 		sum += func(a + i * h);
 	}
-	integral_value = 0;
 	integral_value = h * ((func(a) + func(b)) / 2.0 + sum);
+}
+
+
+void compute_integral_trapezium_modified_method(double a, double b, int N, double& h, double& integral_value) {
+	compute_integral_trapezium_method(a, b, N, h, integral_value);
+	integral_value += (h * h) / 12.0 * (compute_derivative_func(a) - compute_derivative_func(b));
+}
+
+void compute_integral_simpson(double a, double b, int N, double& h, double& integral_value) {
+	h = (b - a) / N;
+	double sum1 = 0;
+	double sum2 = 0;
+	for (int i = 1; i < N; i++) {
+		if (i & 1) {
+			sum1 += func(a + i * h);
+		}
+		else {
+			sum2 += func(a + i * h);
+		}
+	}
+
+	integral_value = h * ((func(a) + func(b)) + 4 * sum1 + 2 * sum2) / 3.0;
+}
+
+void compute_integral_gauss(double a, double b, int N, double& h, double& integral_value) {
+	h = (b - a) / N;
+	double sum = 0;
+	for (int i = 0; i < N; i++) {
+		double x = a + (1.0 + 2.0 * i) * h / 2.0;
+		sum += h / 2.0 * (
+						   	(5.0 / 9.0) * func(x - sqrt(3.0 / 5.0) * h / 2.0)  
+						  + (8.0 / 9.0) * func(x) 
+						  + (5.0 / 9.0) * func(x + sqrt(3.0 / 5.0) * h / 2.0)
+						  );
+	}
+
+	integral_value = sum;
 }

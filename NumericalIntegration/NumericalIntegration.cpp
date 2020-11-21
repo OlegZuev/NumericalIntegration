@@ -15,5 +15,8 @@ int main()
 
 	out << "Variant: " << VARIANT << endl;
 
-	trapezium_method(1, 2, out);
+	// run_method(1, 2, trapezoid, out);
+	// run_method(1, 2, trapezoid_modified, out);
+	// run_method(1, 2, simpson, out);
+	run_method(1, 2, gauss, out);
 }
