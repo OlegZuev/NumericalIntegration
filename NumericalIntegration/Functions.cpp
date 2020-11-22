@@ -24,21 +24,6 @@ double func(double x) {
 }
 
 /*
- * max f^(number_of_derivative) on [a,b]
- */
-double compute_m(int number_of_derivative) {
-	switch (VARIANT) {
-	case 0:
-	case 5:
-		return fabs(3 * pow(log(3), number_of_derivative));
-	case 7:
-		return fabs(pow(-2, number_of_derivative) * exp(-2));
-	}
-
-	throw std::runtime_error("I don't know how to compute this derivative");
-}
-
-/*
  * compute first derivative func
  */
 double compute_derivative_func(double x) {
@@ -95,6 +80,9 @@ void print_matrix(double** matrix, int n, int m, std::ostream& ostr) {
 	ostr << std::endl;
 }
 
+/*
+ * trapezoid method for finding the value of the quadrature form of the integral
+ */
 void trapezoid_method(double a, double b, bool modified, std::ostream& ostr) {
 	void (*compute_integral)(double a, double b, int N, double& h, double& integral_value) = nullptr;
 	double coef = 1 / 3.0;
@@ -168,6 +156,9 @@ void trapezoid_method(double a, double b, bool modified, std::ostream& ostr) {
 	ostr << "Number of requests " << count_call1 << std::endl;
 }
 
+/*
+ * simpson method for finding the value of the quadrature form of the integral
+ */
 void simpson_method(double a, double b, std::ostream& ostr) {
 	void (*compute_integral)(double a, double b, int N, double& h, double& integral_value) = compute_integral_simpson;
 	double coef = 1 / 15.0;
@@ -225,6 +216,9 @@ void simpson_method(double a, double b, std::ostream& ostr) {
 	ostr << "Number of requests " << count_call2 << std::endl;
 }
 
+/*
+ * gauss method for finding the value of the quadrature form of the integral
+ */
 void gauss_method(double a, double b, std::ostream& ostr) {
 	void (*compute_integral)(double a, double b, int N, double& h, double& integral_value) = compute_integral_gauss;
 	double coef = 1 / 63.0;
@@ -290,6 +284,9 @@ void gauss_method(double a, double b, std::ostream& ostr) {
 	ostr << "Number of requests " << count_of_calls_to_the_function - count_call2 - count_call3 - begin_count_of_calls_to_the_function << std::endl;
 }
 
+/*
+ * finding the value of the quadrature form of the integral via trapezium method
+ */
 void compute_integral_trapezium_method(double a, double b, int N, double& h, double& integral_value) {
 	h = (b - a) / N;
 	double sum = 0;
@@ -299,12 +296,17 @@ void compute_integral_trapezium_method(double a, double b, int N, double& h, dou
 	integral_value = h * ((func(a) + func(b)) / 2.0 + sum);
 }
 
-
+/*
+ * finding the value of the quadrature form of the integral via trapezium modified method
+ */
 void compute_integral_trapezium_modified_method(double a, double b, int N, double& h, double& integral_value) {
 	compute_integral_trapezium_method(a, b, N, h, integral_value);
 	integral_value += (h * h) / 12.0 * (compute_derivative_func(a) - compute_derivative_func(b));
 }
 
+/*
+ * finding the value of the quadrature form of the integral via simpson method
+ */
 void compute_integral_simpson(double a, double b, int N, double& h, double& integral_value) {
 	h = (b - a) / N;
 	double sum1 = 0;
@@ -321,6 +323,9 @@ void compute_integral_simpson(double a, double b, int N, double& h, double& inte
 	integral_value = h * ((func(a) + func(b)) + 4 * sum1 + 2 * sum2) / 3.0;
 }
 
+/*
+ * finding the value of the quadrature form of the integral via gauss method
+ */
 void compute_integral_gauss(double a, double b, int N, double& h, double& integral_value) {
 	h = (b - a) / N;
 	double sum = 0;

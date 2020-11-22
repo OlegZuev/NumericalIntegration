@@ -10,8 +10,6 @@ enum TypeMethod {
 
 double func(double x);
 
-double compute_m(int number_of_derivative);
-
 double compute_derivative_func(double x);
 
 void allocate_matrix(double**& matrix, int n, int m);
