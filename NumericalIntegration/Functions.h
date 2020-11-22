@@ -1,7 +1,7 @@
 #pragma once
 #include <ostream>
 
-const int VARIANT = 5;
+const int VARIANT = 7;
 const double EPS = 1E-8;//0.00000001;
 
 enum TypeMethod {

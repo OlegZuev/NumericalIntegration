@@ -46,9 +46,9 @@ double compute_derivative_func(double x) {
  * m - count of columns
  */
 void allocate_matrix(double**& matrix, int n, int m) {
-	matrix = new double* [n];
+	matrix = new double*[n];
 	for (int i = 0; i < n; ++i) {
-		matrix[i] = new double[m] {0};
+		matrix[i] = new double[m]{0};
 	}
 }
 
@@ -94,7 +94,7 @@ void trapezoid_method(double a, double b, bool modified, std::ostream& ostr) {
 		compute_integral = compute_integral_trapezium_method;
 	}
 
-	ostr << "|N    |h     |Integral |Error estimation|  k   |" << std::endl;
+	ostr << "|N    |h     |Integral |Error estimation      |  k   |" << std::endl;
 
 	double error;
 	int N = 1;
@@ -140,20 +140,21 @@ void trapezoid_method(double a, double b, bool modified, std::ostream& ostr) {
 		error = (integral_h1 - integral_h0) * coef;
 
 		if (N > 4) {
-			ostr << std::fixed << std::setprecision(9) << "|" << N / 4 << "|" << h1 << "|" << integral_h1 << "|" <<
-				std::scientific << error << "|" << std::fixed << k << "|" << std::endl;
-		}
-		else {
-			ostr << std::fixed << std::setprecision(9) << "|" << N / 4 << "|" << h1 << "|" << integral_h1 << "|" <<
-				std::scientific << std::endl;
+			ostr << std::fixed << "|" << std::setw(5) << N / 4 << "|" << std::setprecision(4) << h1 << "|" <<
+				std::setw(9) << std::setprecision(6) << integral_h1 << "|" <<
+				std::scientific << std::setprecision(15) << error << "|" << std::fixed << std::setprecision(4) << k <<
+				"|" << std::endl;
+		} else {
+			ostr << std::fixed << "|" << std::setw(5) << N / 4 << "|" << std::setprecision(4) << h1 << "|" <<
+				std::setw(9) << std::setprecision(6) << integral_h1 << "|" << std::endl;
 		}
 
 
 		N *= 2;
-	} while (fabs(error / integral_h1)  > EPS);
+	} while (fabs(error / integral_h1) > EPS);
 
 	ostr << "Result " << std::setprecision(15) << integral_h1 << std::endl;
-	ostr << "Number of requests " << count_call1 << std::endl;
+	ostr << "Number of requests " << count_call1 << std::endl << std::endl;
 }
 
 /*
@@ -163,7 +164,7 @@ void simpson_method(double a, double b, std::ostream& ostr) {
 	void (*compute_integral)(double a, double b, int N, double& h, double& integral_value) = compute_integral_simpson;
 	double coef = 1 / 15.0;
 	ostr << "Simpson formula" << std::endl;
-	ostr << "|N    |h     |Integral |Error estimation|  k   |" << std::endl;
+	ostr << "|N    |h     |Integral |Error estimation      |  k   |" << std::endl;
 
 	double error;
 	int N = 1;
@@ -206,14 +207,21 @@ void simpson_method(double a, double b, std::ostream& ostr) {
 		k = log((integral_h3 - integral_h1) / (integral_h2 - integral_h1) - 1) / log(0.5);
 		error = (integral_h2 - integral_h1) * coef;
 
-		ostr << std::fixed << std::setprecision(9) << "|" << N / 4 << "|" << h1 << "|" << integral_h2 << "|" <<
-			std::scientific << error << "|" << std::fixed << k << "|" << std::endl;
+		if (N > 4) {
+			ostr << std::fixed << "|" << std::setw(5) << N / 4 << "|" << std::setprecision(4) << h1 << "|" <<
+				std::setw(9) << std::setprecision(6) << integral_h2 << "|" <<
+				std::scientific << std::setprecision(15) << error << "|" << std::fixed << std::setprecision(4) << k <<
+				"|" << std::endl;
+		} else {
+			ostr << std::fixed << "|" << std::setw(5) << N / 4 << "|" << std::setprecision(4) << h1 << "|" <<
+				std::setw(9) << std::setprecision(6) << integral_h2 << "|" << std::endl;
+		}
 
 		N *= 2;
-	} while (fabs(error / integral_h2)  > EPS);
+	} while (fabs(error / integral_h2) > EPS);
 
 	ostr << "Result " << std::setprecision(15) << integral_h2 << std::endl;
-	ostr << "Number of requests " << count_call2 << std::endl;
+	ostr << "Number of requests " << count_call2 << std::endl << std::endl;
 }
 
 /*
@@ -223,7 +231,7 @@ void gauss_method(double a, double b, std::ostream& ostr) {
 	void (*compute_integral)(double a, double b, int N, double& h, double& integral_value) = compute_integral_gauss;
 	double coef = 1 / 63.0;
 	ostr << "Gauss formula" << std::endl;
-	ostr << "|N    |h     |Integral |Error estimation|  k   |" << std::endl;
+	ostr << "|N    |h     |Integral |Error estimation     |  k   |" << std::endl;
 
 	double error;
 	int N = 1;
@@ -269,19 +277,22 @@ void gauss_method(double a, double b, std::ostream& ostr) {
 		error = (integral_h1 - integral_h0) * coef;
 
 		if (N > 4) {
-			ostr << std::fixed << std::setprecision(9) << "|" << N / 4 << "|" << h1 << "|" << integral_h1 << "|" <<
-				std::scientific << error << "|" << std::fixed << k << "|" << std::endl;
+			ostr << std::fixed << "|" << std::setw(5) << N / 4 << "|" << std::setprecision(4) << h1 << "|" <<
+				std::setw(9) << std::setprecision(6) << integral_h1 << "|" <<
+				std::scientific << std::setprecision(15) << error << "|" << std::fixed << std::setprecision(4) << k <<
+				"|" << std::endl;
 		}
 		else {
-			ostr << std::fixed << std::setprecision(9) << "|" << N / 4 << "|" << h1 << "|" << integral_h1 << "|" <<
-				std::scientific << std::endl;
+			ostr << std::fixed << "|" << std::setw(5) << N / 4 << "|" << std::setprecision(4) << h1 << "|" <<
+				std::setw(9) << std::setprecision(6) << integral_h1 << "|" << std::endl;
 		}
 
 		N *= 2;
 	} while (fabs(error / integral_h1) > EPS);
 
 	ostr << "Result " << std::setprecision(15) << integral_h1 << std::endl;
-	ostr << "Number of requests " << count_of_calls_to_the_function - count_call2 - count_call3 - begin_count_of_calls_to_the_function << std::endl;
+	ostr << "Number of requests " << count_of_calls_to_the_function - count_call2 - count_call3 -
+		begin_count_of_calls_to_the_function << std::endl << std::endl;
 }
 
 /*
@@ -314,8 +325,7 @@ void compute_integral_simpson(double a, double b, int N, double& h, double& inte
 	for (int i = 1; i < N; i++) {
 		if (i & 1) {
 			sum1 += func(a + i * h);
-		}
-		else {
+		} else {
 			sum2 += func(a + i * h);
 		}
 	}
@@ -332,10 +342,10 @@ void compute_integral_gauss(double a, double b, int N, double& h, double& integr
 	for (int i = 0; i < N; i++) {
 		double x = a + (1.0 + 2.0 * i) * h / 2.0;
 		sum += h / 2.0 * (
-						   	(5.0 / 9.0) * func(x - sqrt(3.0 / 5.0) * h / 2.0)  
-						  + (8.0 / 9.0) * func(x) 
-						  + (5.0 / 9.0) * func(x + sqrt(3.0 / 5.0) * h / 2.0)
-						  );
+			(5.0 / 9.0) * func(x - sqrt(3.0 / 5.0) * h / 2.0)
+			+ (8.0 / 9.0) * func(x)
+			+ (5.0 / 9.0) * func(x + sqrt(3.0 / 5.0) * h / 2.0)
+		);
 	}
 
 	integral_value = sum;
